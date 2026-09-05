@@ -1,6 +1,6 @@
-# [Project name]
+# Prescription Pad
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Prescription Pad is a local-first mobile prescription-writing tool for doctors that produces A4 PDFs for printing, signing, and sharing.
 
 ## Run & Operate
 
@@ -19,18 +19,26 @@ _Replace the heading above with the project's name, and this line with one sente
 - Validation: Zod (`zod/v4`), `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
 - Build: esbuild (CJS bundle)
+- Mobile: Expo Router, React Native, AsyncStorage, expo-print, expo-sharing
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/prescription-pad/app/(tabs)/index.tsx` — prescription editor and A4 preview flow
+- `artifacts/prescription-pad/app/(tabs)/settings.tsx` — local doctor profile/template settings
+- `artifacts/prescription-pad/app/(tabs)/history.tsx` — lightweight local history
+- `artifacts/prescription-pad/state/PrescriptionContext.tsx` — AsyncStorage-backed local state
+- `artifacts/prescription-pad/data/medicineProvider.ts` — pluggable medicine catalog boundary and clearly marked sample records
+- `artifacts/prescription-pad/utils/pdf.ts` — A4 HTML/PDF renderer and native share/save helpers
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The core workflow is fully offline and stores doctor/patient data in AsyncStorage; no backend is involved.
+- Medicine search is isolated behind `MedicineProvider` so an official NRCeS CDCI flat-file importer can replace the sample provider in Phase 2.
+- The PDF is generated from a dedicated A4 HTML renderer with print CSS rather than capturing the mobile editor UI.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Doctors can configure their prescription header, search sample medicines, enter dosing instructions, preview an A4 prescription, generate/share/save the PDF, and revisit local history.
 
 ## User preferences
 

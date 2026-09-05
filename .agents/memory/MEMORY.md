@@ -1,0 +1,1 @@
+- [Expo mobile persistence and PDF setup](expo-prescription-pad.md) — local-first AsyncStorage/provider boundary; SDK 57 PDF file saves use the legacy file-system import.
