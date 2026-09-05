@@ -11,9 +11,9 @@ export function prescriptionHtml(doctor: DoctorProfile, draft: PrescriptionDraft
     .map(
       (medicine, index) => `
       <tr>
-        <td><strong>${index + 1}. ${escapeHtml(medicine.productName)}</strong><small>${escapeHtml(medicine.composition)}</small><em>${escapeHtml(medicine.prescribedRoute || medicine.route)} · ${escapeHtml(medicine.instructions || 'As directed')}</em></td>
-        <td>${escapeHtml(medicine.dose || '—')}</td>
-        <td><strong>${escapeHtml(medicine.frequency || '—')}</strong><small>${escapeHtml(medicine.duration || '—')}</small></td>
+        <td><strong>${index + 1}. ${escapeHtml(medicine.medicineName || 'Medicine name')}</strong><small>${escapeHtml([medicine.composition, medicine.strength, medicine.dosageForm].filter(Boolean).join(' · '))}</small><em>${escapeHtml([medicine.route, medicine.instructions].filter(Boolean).join(' · ') || 'As directed')}</em></td>
+        <td>${escapeHtml([medicine.dose, medicine.doseUnit].filter(Boolean).join(' ') || '—')}</td>
+        <td><strong>${escapeHtml(medicine.frequency || '—')}</strong><small>${escapeHtml([medicine.duration, medicine.durationUnit].filter(Boolean).join(' ') || '—')}</small>${medicine.quantity ? `<small>Qty ${escapeHtml(medicine.quantity)}</small>` : ''}</td>
       </tr>`,
     )
     .join('');

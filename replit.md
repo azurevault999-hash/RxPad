@@ -27,18 +27,18 @@ Prescription Pad is a local-first mobile prescription-writing tool for doctors t
 - `artifacts/prescription-pad/app/(tabs)/settings.tsx` — local doctor profile/template settings
 - `artifacts/prescription-pad/app/(tabs)/history.tsx` — lightweight local history
 - `artifacts/prescription-pad/state/PrescriptionContext.tsx` — AsyncStorage-backed local state
-- `artifacts/prescription-pad/data/medicineProvider.ts` — pluggable medicine catalog boundary and clearly marked sample records
+- `artifacts/prescription-pad/data/medicineCatalog.ts` — unused future catalogue interface; current prescriptions are catalogue-independent
 - `artifacts/prescription-pad/utils/pdf.ts` — A4 HTML/PDF renderer and native share/save helpers
 
 ## Architecture decisions
 
 - The core workflow is fully offline and stores doctor/patient data in AsyncStorage; no backend is involved.
-- Medicine search is isolated behind `MedicineProvider` so an official NRCeS CDCI flat-file importer can replace the sample provider in Phase 2.
+- The current medicine workflow is entirely manual and stores editable `PrescriptionMedication` fields; a future catalogue can optionally prefill them without becoming a dependency.
 - The PDF is generated from a dedicated A4 HTML renderer with print CSS rather than capturing the mobile editor UI.
 
 ## Product
 
-Doctors can configure their prescription header, search sample medicines, enter dosing instructions, preview an A4 prescription, generate/share/save the PDF, and revisit local history.
+Doctors can configure their prescription header, manually enter fully editable medicines and dosing instructions, preview an A4 prescription, generate/share/save the PDF, and revisit local history.
 
 ## User preferences
 

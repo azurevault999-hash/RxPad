@@ -13,23 +13,35 @@ export type DoctorProfile = {
   footerText: string;
 };
 
-export type Medicine = {
+export type PrescriptionMedication = {
   id: string;
-  productName: string;
+  medicineName: string;
   composition: string;
   strength: string;
   dosageForm: string;
-  route: string;
-  manufacturer: string;
-  nrcesCode: string;
-};
-
-export type PrescriptionMedicine = Medicine & {
   dose: string;
+  doseUnit: string;
   frequency: string;
   duration: string;
-  prescribedRoute: string;
+  durationUnit: string;
+  route: string;
+  quantity: string;
   instructions: string;
+};
+
+/**
+ * Future-only catalogue shape. It is intentionally not used by the current
+ * editor or persistence layer. A future selection can prefill a
+ * PrescriptionMedication, after which every field remains editable.
+ */
+export type MedicineCatalogItem = {
+  id: string;
+  medicineName: string;
+  composition: string;
+  strength: string;
+  dosageForm: string;
+  manufacturer?: string;
+  catalogCode?: string;
 };
 
 export type PrescriptionDraft = {
@@ -43,7 +55,7 @@ export type PrescriptionDraft = {
   clinicalNotes: string;
   advice: string;
   followUp: string;
-  medicines: PrescriptionMedicine[];
+  medicines: PrescriptionMedication[];
 };
 
 export type SavedPrescription = PrescriptionDraft & {
@@ -70,6 +82,59 @@ export const todayLabel = () =>
     month: 'short',
     year: 'numeric',
   }).format(new Date());
+
+export const newMedication = (): PrescriptionMedication => ({
+  id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  medicineName: '',
+  composition: '',
+  strength: '',
+  dosageForm: '',
+  dose: '',
+  doseUnit: '',
+  frequency: '',
+  duration: '',
+  durationUnit: '',
+  route: '',
+  quantity: '',
+  instructions: '',
+});
+
+type LegacyMedication = Partial<PrescriptionMedication> & {
+  productName?: string;
+  prescribedRoute?: string;
+  manufacturer?: string;
+  nrcesCode?: string;
+};
+
+const splitLegacyValue = (value: string | undefined, fallbackUnit: string) => {
+  const match = value?.trim().match(/^(.+?)\s+([a-zA-Z]+)$/);
+  return match ? { value: match[1], unit: match[2] } : { value: value ?? '', unit: fallbackUnit };
+};
+
+/**
+ * Keeps prescriptions saved by the previous prototype readable after the
+ * editable medication model replaces its catalogue-backed shape.
+ */
+export const normalizeMedication = (raw: unknown): PrescriptionMedication => {
+  const item = (raw ?? {}) as LegacyMedication;
+  const legacyDose = splitLegacyValue(item.dose, '');
+  const legacyDuration = splitLegacyValue(item.duration, '');
+  return {
+    id: item.id ?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    medicineName: item.medicineName ?? item.productName ?? '',
+    composition: item.composition ?? '',
+    strength: item.strength ?? '',
+    dosageForm: item.dosageForm ?? '',
+    dose: legacyDose.value,
+    doseUnit: item.doseUnit ?? legacyDose.unit,
+    frequency: item.frequency ?? '',
+    duration: legacyDuration.value,
+    durationUnit: item.durationUnit ?? legacyDuration.unit,
+    route: item.route ?? item.prescribedRoute ?? '',
+    quantity: item.quantity ?? '',
+    instructions: item.instructions ?? '',
+  };
+};
 
 export const newDraft = (): PrescriptionDraft => ({
   id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,

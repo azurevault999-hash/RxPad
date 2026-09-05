@@ -4,6 +4,7 @@ import {
   DoctorProfile,
   emptyDoctorProfile,
   newDraft,
+  normalizeMedication,
   PrescriptionDraft,
   SavedPrescription,
 } from '@/types/prescription';
@@ -42,7 +43,12 @@ export function PrescriptionProvider({ children }: { children: React.ReactNode }
         if (!raw) return;
         const stored = JSON.parse(raw) as StoredState;
         setDoctorState({ ...emptyDoctorProfile, ...stored.doctor });
-        setHistory(stored.history ?? []);
+        setHistory(
+          (stored.history ?? []).map((item) => ({
+            ...item,
+            medicines: (item.medicines ?? []).map(normalizeMedication),
+          })),
+        );
       })
       .catch(() => undefined)
       .finally(() => setHydrated(true));
@@ -61,6 +67,7 @@ export function PrescriptionProvider({ children }: { children: React.ReactNode }
     const existing = history.find((item) => item.id === nextDraft.id);
     const saved: SavedPrescription = {
       ...nextDraft,
+      medicines: nextDraft.medicines.map(normalizeMedication),
       createdAt: existing?.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

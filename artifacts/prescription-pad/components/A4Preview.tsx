@@ -54,14 +54,15 @@ export function A4Preview({ doctor, draft }: { doctor: DoctorProfile; draft: Pre
       {draft.medicines.length ? draft.medicines.map((medicine, index) => (
         <View key={`${medicine.id}-${index}`} style={[styles.medicineRow, { borderBottomColor: colors.border }]}>
           <View style={styles.medicineCol}>
-            <Text style={[styles.medicineName, { color: colors.foreground }]}>{index + 1}. {medicine.productName}</Text>
-            <Text style={[styles.composition, { color: colors.mutedForeground }]}>{medicine.composition}</Text>
-            <Text style={[styles.instruction, { color: colors.primary }]}>{medicine.prescribedRoute || medicine.route}  ·  {medicine.instructions || 'As directed'}</Text>
+            <Text style={[styles.medicineName, { color: colors.foreground }]}>{index + 1}. {medicine.medicineName || 'Medicine name'}</Text>
+            <Text style={[styles.composition, { color: colors.mutedForeground }]}>{[medicine.composition, medicine.strength, medicine.dosageForm].filter(Boolean).join('  ·  ')}</Text>
+            <Text style={[styles.instruction, { color: colors.primary }]}>{[medicine.route, medicine.instructions].filter(Boolean).join('  ·  ') || 'As directed'}</Text>
           </View>
-          <Text style={[styles.doseCol, styles.rowText, { color: colors.foreground }]}>{medicine.dose || '—'}</Text>
+          <Text style={[styles.doseCol, styles.rowText, { color: colors.foreground }]}>{[medicine.dose, medicine.doseUnit].filter(Boolean).join(' ') || '—'}</Text>
           <View style={styles.scheduleCol}>
             <Text style={[styles.rowText, { color: colors.foreground }]}>{medicine.frequency || '—'}</Text>
-            <Text style={[styles.duration, { color: colors.mutedForeground }]}>{medicine.duration || '—'}</Text>
+            <Text style={[styles.duration, { color: colors.mutedForeground }]}>{[medicine.duration, medicine.durationUnit].filter(Boolean).join(' ') || '—'}</Text>
+            {medicine.quantity ? <Text style={[styles.duration, { color: colors.mutedForeground }]}>Qty {medicine.quantity}</Text> : null}
           </View>
         </View>
       )) : (
