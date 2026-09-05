@@ -1,0 +1,271 @@
+Prepare the current Prescription Pad Android project for distribution as a share-ready APK installer.
+
+IMPORTANT:
+Do not redesign the application.
+Do not add new product features.
+Do not change the existing prescription workflow or UI unless required to fix a release/build issue.
+
+The objective is to produce a clean APK that I can download and share directly with another Android user for installation.
+
+==================================================
+1. RELEASE BUILD
+==================================================
+
+Create a proper Android release APK.
+
+Build the release variant, not the debug variant.
+
+The APK must:
+
+- install normally on a modern Android phone
+- launch without requiring Replit
+- work independently after installation
+- work offline
+- retain all currently implemented functionality
+- not require a development server
+- not require Android Studio
+- not require a USB connection to a computer
+
+Do not produce an APK that depends on the Replit development environment.
+
+==================================================
+2. APPLICATION ID
+==================================================
+
+Check the current Android application ID/package name.
+
+If one already exists and changing it is unnecessary, preserve it.
+
+If the current project is still using an obviously temporary/default package name, replace it with a sensible stable application ID appropriate for Prescription Pad.
+
+Do not change the application ID merely for cosmetic reasons if doing so could interfere with an existing installation.
+
+==================================================
+3. APP NAME
+==================================================
+
+The installed application should appear as:
+
+Prescription Pad
+
+Use this as the user-facing application name.
+
+Do not expose development names such as:
+
+- Replit
+- Demo
+- Debug
+- Sample
+- Development Build
+- Test Build
+
+in the installed application's name.
+
+==================================================
+4. VERSIONING
+==================================================
+
+Set an appropriate initial release version.
+
+Use:
+
+versionName = "1.0.0"
+
+Set a valid versionCode/version number appropriate for the current project.
+
+Make sure future releases can increment the version code without requiring structural changes.
+
+==================================================
+5. RELEASE CONFIGURATION
+==================================================
+
+Verify that the release build is configured correctly.
+
+Check:
+
+- minSdk
+- targetSdk
+- compileSdk
+- Android Gradle Plugin compatibility
+- Kotlin compatibility
+- Compose dependencies
+- Room/database dependencies
+- PDF generation dependencies
+- Android permissions
+
+Use the existing project's compatible versions rather than unnecessarily upgrading the entire dependency stack.
+
+Do not introduce unnecessary dependency upgrades just to create the APK.
+
+==================================================
+6. SIGNING
+==================================================
+
+Configure the project so a release APK can be generated.
+
+If a signing key/keystore is already configured, use the existing configuration.
+
+If no production signing key exists:
+
+- create the necessary configuration for a release-signed APK if the Replit environment permits it
+- otherwise configure the project cleanly so that the APK can be built once a keystore is supplied
+
+Do NOT hard-code or expose passwords, signing secrets, API keys, or credentials in source code.
+
+Do not commit private signing credentials to the repository.
+
+If a release APK can be generated without requiring me to manually intervene, do so.
+
+==================================================
+7. APK TYPE
+==================================================
+
+Generate a normal installable universal APK suitable for directly sharing with another Android user.
+
+Prefer a universal APK rather than an architecture-specific APK unless there is a strong technical reason not to.
+
+The recipient should not need to know anything about Android development.
+
+The expected workflow is:
+
+Download APK
+→ tap APK
+→ allow installation from this source if Android asks
+→ install
+→ open Prescription Pad
+
+==================================================
+8. VERIFY THE APK
+==================================================
+
+After building:
+
+1. Confirm the APK was actually generated.
+2. Confirm it is the RELEASE variant.
+3. Confirm it is signed appropriately.
+4. Confirm the package/application ID.
+5. Confirm versionName and versionCode.
+6. Confirm the APK is installable.
+7. If an Android emulator/device is available in the environment, install it and launch it.
+8. Check that the app opens normally.
+9. Check that the main prescription screen loads.
+10. Create a test patient.
+11. Add a medicine using the editable fields.
+12. Generate the prescription preview.
+13. Generate the PDF.
+14. Verify share/print functionality is still present.
+15. Verify the app works without an internet connection.
+
+Do not use test data in a way that becomes part of the shipped application's default state.
+
+==================================================
+9. REMOVE DEVELOPMENT ARTIFACTS
+==================================================
+
+Before creating the final APK, check for:
+
+- debug-only code
+- test screens accidentally exposed in production
+- sample/demo data
+- development banners
+- placeholder text
+- development URLs
+- localhost references
+- Replit-specific runtime dependencies
+- debug logging containing patient/prescription information
+- unnecessary network calls
+- development-only permissions
+
+Remove or disable anything that should not be present in a share-ready build.
+
+Do not remove legitimate functionality merely because it is currently unused.
+
+==================================================
+10. PRIVACY
+==================================================
+
+Prescription Pad is intended to be local-first.
+
+The release APK must not send patient or prescription information to a remote server.
+
+Do not add analytics or telemetry.
+
+Do not add an external backend dependency just to make the release build work.
+
+The app must remain usable offline.
+
+==================================================
+11. DATA PERSISTENCE
+==================================================
+
+Verify that the application's local data storage works in the release build.
+
+In particular, verify that:
+
+- patient/prescription data is stored correctly
+- closing and reopening the app does not unexpectedly erase data
+- the prescription history, if implemented, remains available
+- generated prescriptions can still be viewed/created as currently designed
+
+Do not preload fake patient data.
+
+==================================================
+12. PDF / SHARING
+==================================================
+
+Verify that the production APK can:
+
+- generate the prescription PDF
+- generate an actual A4 document
+- save/access the generated PDF as currently implemented
+- invoke Android's share sheet
+- invoke Android printing where supported
+
+The PDF must not depend on Replit or a web browser.
+
+==================================================
+13. OUTPUT
+==================================================
+
+Build the final release APK.
+
+Place the final APK in an obvious output location, for example:
+
+release/PrescriptionPad-1.0.0.apk
+
+or another similarly clear filename.
+
+Do not leave multiple ambiguous APKs and expect me to determine which one is correct.
+
+If multiple APKs are generated during the build, clearly identify the one intended for direct sharing.
+
+==================================================
+14. FINAL REPORT
+==================================================
+
+When finished, report:
+
+- Build status
+- APK filename
+- APK location
+- Application ID
+- App name
+- Version name
+- Version code
+- Whether it is a release build
+- Signing status
+- APK architecture/type
+- APK file size
+- Whether installation was tested
+- Whether the app launched successfully
+- Any issues that remain
+
+Most importantly:
+
+Actually BUILD the APK.
+
+Do not merely tell me the Gradle command I could run myself.
+
+If the build fails, diagnose and fix the build errors, then rebuild.
+
+The desired end result is one clean, installable, share-ready Prescription Pad APK.
