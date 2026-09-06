@@ -7,8 +7,9 @@ import * as Haptics from 'expo-haptics';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { A4Preview } from '@/components/A4Preview';
 import { useColors } from '@/hooks/useColors';
+import { useMedicineCatalogSearch } from '@/hooks/useMedicineCatalogSearch';
 import { usePrescription } from '@/state/PrescriptionContext';
-import { newMedication, PrescriptionMedication, Sex } from '@/types/prescription';
+import { MedicineCatalogItem, newMedication, PrescriptionMedication, Sex } from '@/types/prescription';
 import { generatePrescriptionPdf, printPdf, savePdf, sharePdf } from '@/utils/pdf';
 
 type FieldProps = {
@@ -50,11 +51,38 @@ export default function WritePrescriptionScreen() {
   const [showMore, setShowMore] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [catalogQuery, setCatalogQuery] = useState('');
+  const { results: catalogResults, loading: catalogLoading } = useMedicineCatalogSearch(catalogQuery);
 
   const update = <K extends keyof typeof draft>(key: K, value: (typeof draft)[K]) => setDraft((current) => ({ ...current, [key]: value }));
   const updateMedication = <K extends keyof PrescriptionMedication>(key: K, value: PrescriptionMedication[K]) => setEditingMedication((current) => current ? { ...current, [key]: value } : current);
-  const startNewMedication = () => setEditingMedication(newMedication());
-  const startEditMedication = (medication: PrescriptionMedication) => setEditingMedication({ ...medication });
+  const startNewMedication = () => {
+    setCatalogQuery('');
+    setEditingMedication(newMedication());
+  };
+  const startEditMedication = (medication: PrescriptionMedication) => {
+    setCatalogQuery('');
+    setEditingMedication({ ...medication });
+  };
+  const closeMedicationEditor = () => {
+    setCatalogQuery('');
+    setEditingMedication(null);
+  };
+  const applyCatalogResult = (item: MedicineCatalogItem) => {
+    setEditingMedication((current) => current ? {
+      ...current,
+      medicineName: item.medicineName,
+      composition: item.composition,
+      strength: item.strength,
+      dosageForm: item.dosageForm,
+      route: item.route,
+      catalogBrandIdentifier: item.catalogBrandIdentifier,
+      catalogProductIdentifier: item.catalogProductIdentifier,
+      catalogGenericIdentifier: item.catalogGenericIdentifier,
+    } : current);
+    setCatalogQuery('');
+    Haptics.selectionAsync();
+  };
   const addOrUpdateMedication = () => {
     if (!editingMedication?.medicineName.trim()) {
       Alert.alert('Medicine name needed', 'Enter the medicine name to add it to the prescription.');
@@ -69,6 +97,7 @@ export default function WritePrescriptionScreen() {
           : [...current.medicines, editingMedication],
       };
     });
+    setCatalogQuery('');
     setEditingMedication(null);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
@@ -124,10 +153,18 @@ export default function WritePrescriptionScreen() {
         {showMore ? <View style={styles.card}><Field label="Diagnosis" value={draft.diagnosis} onChangeText={(value) => update('diagnosis', value)} placeholder="Optional" /><Field label="Clinical notes" value={draft.clinicalNotes} onChangeText={(value) => update('clinicalNotes', value)} placeholder="Optional" multiline /><Field label="Advice" value={draft.advice} onChangeText={(value) => update('advice', value)} placeholder="Optional" multiline /><Field label="Follow-up" value={draft.followUp} onChangeText={(value) => update('followUp', value)} placeholder="e.g. Review after 5 days" /></View> : null}
 
         <View style={styles.sectionHeader}><Text style={[styles.sectionTitle, { color: colors.foreground }]}>Medicines</Text><Text style={[styles.sectionHint, { color: colors.mutedForeground }]}>{draft.medicines.length} added</Text></View>
-        <Text style={[styles.helperText, { color: colors.mutedForeground }]}>Enter medicine details directly. Every field can be edited.</Text>
+        <Text style={[styles.helperText, { color: colors.mutedForeground }]}>Search the local medicine catalogue or enter a custom medicine. Every field can be edited.</Text>
         {editingMedication ? <View style={[styles.medicineEditor, { backgroundColor: colors.secondary }]}>
-          <View style={styles.editorTitleRow}><View style={{ flex: 1 }}><Text style={[styles.editorName, { color: colors.foreground }]}>{editingMedication.id ? (draft.medicines.some((item) => item.id === editingMedication.id) ? 'Edit medicine' : 'New medicine') : 'New medicine'}</Text><Text style={[styles.suggestionMeta, { color: colors.mutedForeground }]}>Enter the details you want printed</Text></View><Pressable onPress={() => setEditingMedication(null)}><Feather name="x" size={19} color={colors.mutedForeground} /></Pressable></View>
-          <Field label="Medicine name" value={editingMedication.medicineName} onChangeText={(value) => updateMedication('medicineName', value)} placeholder="e.g. Amoxicillin" />
+          <View style={styles.editorTitleRow}><View style={{ flex: 1 }}><Text style={[styles.editorName, { color: colors.foreground }]}>{editingMedication.id ? (draft.medicines.some((item) => item.id === editingMedication.id) ? 'Edit medicine' : 'New medicine') : 'New medicine'}</Text><Text style={[styles.suggestionMeta, { color: colors.mutedForeground }]}>Enter the details you want printed</Text></View><Pressable onPress={closeMedicationEditor}><Feather name="x" size={19} color={colors.mutedForeground} /></Pressable></View>
+          <Field label="Medicine name" value={editingMedication.medicineName} onChangeText={(value) => { updateMedication('medicineName', value); setCatalogQuery(value); }} placeholder="Search or enter a medicine" />
+          {catalogQuery.trim().length >= 2 ? <View style={[styles.catalogPanel, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={styles.catalogPanelHeader}><Text style={[styles.catalogPanelTitle, { color: colors.foreground }]}>Medicine catalogue</Text>{catalogLoading ? <Text style={[styles.suggestionMeta, { color: colors.mutedForeground }]}>Searching…</Text> : null}</View>
+            {!catalogLoading && !catalogResults.length ? <Text style={[styles.catalogEmpty, { color: colors.mutedForeground }]}>No catalogue match. You can keep entering a custom medicine.</Text> : null}
+            {catalogResults.map((item) => <Pressable key={item.id} onPress={() => applyCatalogResult(item)} style={[styles.catalogResult, { borderTopColor: colors.border }]}>
+              <Text style={[styles.catalogResultName, { color: colors.foreground }]} numberOfLines={2}>{item.brandName || item.medicineName}</Text>
+              <Text style={[styles.suggestionMeta, { color: colors.mutedForeground }]} numberOfLines={2}>{[item.productName, item.genericName, item.dosageForm].filter(Boolean).join('  · ')}</Text>
+            </Pressable>)}
+          </View> : null}
           <Field label="Composition / generic" value={editingMedication.composition} onChangeText={(value) => updateMedication('composition', value)} placeholder="e.g. Amoxicillin + Clavulanic Acid" />
           <View style={styles.row}><View style={styles.half}><Field label="Strength" value={editingMedication.strength} onChangeText={(value) => updateMedication('strength', value)} placeholder="e.g. 500 mg" /></View><View style={styles.half}><Field label="Dosage form" value={editingMedication.dosageForm} onChangeText={(value) => updateMedication('dosageForm', value)} placeholder="Tablet" /></View></View>
           <View style={styles.row}><View style={styles.half}><Field label="Dose" value={editingMedication.dose} onChangeText={(value) => updateMedication('dose', value)} placeholder="1" /></View><View style={styles.half}><Field label="Dose unit" value={editingMedication.doseUnit} onChangeText={(value) => updateMedication('doseUnit', value)} placeholder="tablet" /></View></View>
@@ -183,6 +220,12 @@ const styles = StyleSheet.create({
   medicineEditor: { marginTop: 4, padding: 14, borderRadius: 16 },
   editorTitleRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 14 },
   editorName: { fontSize: 15, fontWeight: '700' },
+  catalogPanel: { borderWidth: 1, borderRadius: 12, marginTop: -4, marginBottom: 12, overflow: 'hidden' },
+  catalogPanelHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 9 },
+  catalogPanelTitle: { fontSize: 12, fontWeight: '700' },
+  catalogEmpty: { fontSize: 12, lineHeight: 17, paddingHorizontal: 12, paddingBottom: 11 },
+  catalogResult: { borderTopWidth: 1, paddingHorizontal: 12, paddingVertical: 10 },
+  catalogResultName: { fontSize: 13, lineHeight: 18, fontWeight: '700' },
   addButton: { minHeight: 47, borderRadius: 12, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, marginTop: 2 },
   addButtonText: { fontSize: 14, fontWeight: '700' },
   medicineCard: { borderWidth: 1, borderRadius: 15, padding: 14, marginTop: 11 },

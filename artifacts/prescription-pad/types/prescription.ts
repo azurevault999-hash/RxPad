@@ -27,21 +27,26 @@ export type PrescriptionMedication = {
   route: string;
   quantity: string;
   instructions: string;
+  catalogBrandIdentifier?: string;
+  catalogProductIdentifier?: string;
+  catalogGenericIdentifier?: string;
 };
 
-/**
- * Future-only catalogue shape. It is intentionally not used by the current
- * editor or persistence layer. A future selection can prefill a
- * PrescriptionMedication, after which every field remains editable.
- */
 export type MedicineCatalogItem = {
   id: string;
   medicineName: string;
   composition: string;
   strength: string;
   dosageForm: string;
-  manufacturer?: string;
-  catalogCode?: string;
+  route: string;
+  brandName: string;
+  productName: string;
+  genericName: string;
+  substanceNames: string;
+  supplierName: string;
+  catalogBrandIdentifier: string;
+  catalogProductIdentifier: string;
+  catalogGenericIdentifier: string;
 };
 
 export type PrescriptionDraft = {
@@ -133,6 +138,9 @@ export const normalizeMedication = (raw: unknown): PrescriptionMedication => {
     route: item.route ?? item.prescribedRoute ?? '',
     quantity: item.quantity ?? '',
     instructions: item.instructions ?? '',
+    catalogBrandIdentifier: item.catalogBrandIdentifier ?? item.nrcesCode,
+    catalogProductIdentifier: item.catalogProductIdentifier,
+    catalogGenericIdentifier: item.catalogGenericIdentifier,
   };
 };
 

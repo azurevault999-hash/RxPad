@@ -1,0 +1,20 @@
+Copyright (c) 2019, Centre for Development of Advanced Computing (C-DAC), Pune
+All rights reserved.
+
+The Common Drug Codes for India (Flat Files Package) is produced by National
+Resource Centre for EHR Standards (NRCeS) at Centre for Development of
+Advanced Computing (C-DAC), Pune under the terms of the Creative Commons
+Attribution 4.0 International Public License:
+https://creativecommons.org/licenses/by/4.0/
+
+The package includes some SNOMED CT International Release content. Usage of
+that content is governed by the relevant clauses of the SNOMED CT Affiliate
+License extended to the user of this package.
+
+The Licensee can redistribute this package within India and can create
+derivatives and implementation-related products and services using this
+package within India.
+
+C-DAC does not warrant the accuracy, completeness, or adequacy of content.
+The content provided is intended but not promised or guaranteed to be current,
+complete, or up-to-date.

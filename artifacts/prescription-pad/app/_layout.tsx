@@ -13,6 +13,7 @@ import {
 } from '@expo-google-fonts/inter';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { CatalogBackedApp } from '@/components/CatalogBackedApp';
 import { PrescriptionProvider } from '@/state/PrescriptionContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -25,6 +26,20 @@ function RootLayoutNav() {
     <Stack screenOptions={{ headerBackTitle: 'Back' }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     </Stack>
+  );
+}
+
+function AppProviders() {
+  return (
+    <PrescriptionProvider>
+      <QueryClientProvider client={queryClient}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <KeyboardProvider>
+            <RootLayoutNav />
+          </KeyboardProvider>
+        </GestureHandlerRootView>
+      </QueryClientProvider>
+    </PrescriptionProvider>
   );
 }
 
@@ -47,15 +62,9 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
-        <PrescriptionProvider>
-          <QueryClientProvider client={queryClient}>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <KeyboardProvider>
-                <RootLayoutNav />
-              </KeyboardProvider>
-            </GestureHandlerRootView>
-          </QueryClientProvider>
-        </PrescriptionProvider>
+        <CatalogBackedApp>
+          <AppProviders />
+        </CatalogBackedApp>
       </ErrorBoundary>
     </SafeAreaProvider>
   );

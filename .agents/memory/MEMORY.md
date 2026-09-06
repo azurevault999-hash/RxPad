@@ -1,1 +1,2 @@
 - [Expo mobile persistence and PDF setup](expo-prescription-pad.md) — local-first AsyncStorage/provider boundary; SDK 57 PDF file saves use the legacy file-system import.
+- [CDCI catalog packaging](cdci-catalog.md) — bundled SQLite uses native-only provider/asset modules so web preview remains manual-only and Android stays fully offline.
