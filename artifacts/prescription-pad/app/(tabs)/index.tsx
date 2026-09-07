@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import {
-  Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
+  Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { A4Preview } from '@/components/A4Preview';
 import { useColors } from '@/hooks/useColors';
@@ -46,6 +47,7 @@ function SelectChip({ label, selected, onPress }: { label: string; selected: boo
 
 export default function WritePrescriptionScreen() {
   const colors = useColors();
+  const insets = useSafeAreaInsets();
   const { doctor, draft, setDraft, savePrescription, resetDraft } = usePrescription();
   const [editingMedication, setEditingMedication] = useState<PrescriptionMedication | null>(null);
   const [showMore, setShowMore] = useState(false);
@@ -53,6 +55,7 @@ export default function WritePrescriptionScreen() {
   const [busy, setBusy] = useState(false);
   const [catalogQuery, setCatalogQuery] = useState('');
   const { results: catalogResults, loading: catalogLoading } = useMedicineCatalogSearch(catalogQuery);
+  const androidBottomInset = Platform.OS === 'android' ? insets.bottom : 0;
 
   const update = <K extends keyof typeof draft>(key: K, value: (typeof draft)[K]) => setDraft((current) => ({ ...current, [key]: value }));
   const updateMedication = <K extends keyof PrescriptionMedication>(key: K, value: PrescriptionMedication[K]) => setEditingMedication((current) => current ? { ...current, [key]: value } : current);
@@ -183,8 +186,8 @@ export default function WritePrescriptionScreen() {
       <Modal visible={showPreview} animationType="slide" onRequestClose={() => setShowPreview(false)}>
         <View style={[styles.previewScreen, { backgroundColor: colors.background }]}>
           <View style={styles.previewHeader}><Pressable onPress={() => setShowPreview(false)} style={styles.backButton}><Feather name="arrow-left" size={21} color={colors.foreground} /></Pressable><View style={{ flex: 1 }}><Text style={[styles.previewTitle, { color: colors.foreground }]}>A4 preview</Text><Text style={[styles.sectionHint, { color: colors.mutedForeground }]}>Print-ready document</Text></View><Feather name="check-circle" size={20} color={colors.primary} /></View>
-          <ScrollView contentContainerStyle={styles.previewContent}><A4Preview doctor={doctor} draft={draft} /><Text style={[styles.previewNote, { color: colors.mutedForeground }]}>The final PDF uses a true A4 page with print margins, not a screenshot of this editor.</Text></ScrollView>
-          <View style={[styles.actionBar, { backgroundColor: colors.card, borderTopColor: colors.border }]}><Pressable disabled={busy} onPress={() => createPdf('save')} style={[styles.actionButton, { borderColor: colors.border }]}><Feather name="download" size={18} color={colors.primary} /><Text style={[styles.actionButtonText, { color: colors.foreground }]}>Save</Text></Pressable><Pressable disabled={busy} onPress={() => createPdf('share')} style={[styles.actionButton, { backgroundColor: colors.primary }]}><Feather name="share-2" size={18} color={colors.primaryForeground} /><Text style={[styles.actionButtonText, { color: colors.primaryForeground }]}>Share PDF</Text></Pressable><Pressable disabled={busy} onPress={() => createPdf('print')} style={[styles.printButton, { backgroundColor: colors.secondary }]}><Feather name="printer" size={19} color={colors.primary} /></Pressable></View>
+          <ScrollView contentContainerStyle={[styles.previewContent, { paddingBottom: 16 + androidBottomInset }]}><A4Preview doctor={doctor} draft={draft} /><Text style={[styles.previewNote, { color: colors.mutedForeground }]}>The final PDF uses a true A4 page with print margins, not a screenshot of this editor.</Text></ScrollView>
+          <View style={[styles.actionBar, { backgroundColor: colors.card, borderTopColor: colors.border, paddingBottom: 14 + androidBottomInset }]}><Pressable disabled={busy} onPress={() => createPdf('save')} style={[styles.actionButton, { borderColor: colors.border }]}><Feather name="download" size={18} color={colors.primary} /><Text style={[styles.actionButtonText, { color: colors.foreground }]}>Save</Text></Pressable><Pressable disabled={busy} onPress={() => createPdf('share')} style={[styles.actionButton, { backgroundColor: colors.primary }]}><Feather name="share-2" size={18} color={colors.primaryForeground} /><Text style={[styles.actionButtonText, { color: colors.primaryForeground }]}>Share PDF</Text></Pressable><Pressable disabled={busy} onPress={() => createPdf('print')} style={[styles.printButton, { backgroundColor: colors.secondary }]}><Feather name="printer" size={19} color={colors.primary} /></Pressable></View>
         </View>
       </Modal>
     </View>
