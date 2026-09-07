@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useColors } from '@/hooks/useColors';
 import { usePrescription } from '@/state/PrescriptionContext';
+import { ThemePreference, useTheme } from '@/state/ThemeContext';
 import { DoctorProfile } from '@/types/prescription';
 
 function ProfileField({ label, value, onChangeText, placeholder, multiline }: { label: string; value: string; onChangeText: (value: string) => void; placeholder: string; multiline?: boolean }) {
@@ -14,6 +16,7 @@ function ProfileField({ label, value, onChangeText, placeholder, multiline }: { 
 export default function SettingsScreen() {
   const colors = useColors();
   const { doctor, setDoctor } = usePrescription();
+  const { preference, setPreference } = useTheme();
   const [form, setForm] = useState<DoctorProfile>(doctor);
   const update = <K extends keyof DoctorProfile>(key: K, value: DoctorProfile[K]) => setForm((current) => ({ ...current, [key]: value }));
   const pickImage = async (field: 'logoUri' | 'signatureImageUri' | 'qrCodeImageUri') => {
@@ -42,8 +45,10 @@ export default function SettingsScreen() {
     <View style={styles.section}><Text style={[styles.sectionTitle, { color: colors.foreground }]}>Professional details</Text><ProfileField label="Doctor name" value={form.name} onChangeText={(value) => update('name', value)} placeholder="e.g. Dr. Riya Mehta" /><View style={styles.row}><View style={styles.half}><ProfileField label="Qualifications" value={form.qualifications} onChangeText={(value) => update('qualifications', value)} placeholder="MBBS, MD" /></View><View style={styles.half}><ProfileField label="Specialty" value={form.specialty} onChangeText={(value) => update('specialty', value)} placeholder="General Medicine" /></View></View><ProfileField label="Medical registration / licence number" value={form.registrationNumber} onChangeText={(value) => update('registrationNumber', value)} placeholder="Registration number" /></View>
     <View style={styles.section}><Text style={[styles.sectionTitle, { color: colors.foreground }]}>Clinic details</Text><ProfileField label="Clinic / hospital name" value={form.clinicName} onChangeText={(value) => update('clinicName', value)} placeholder="Clinic name" /><ProfileField label="Address" value={form.address} onChangeText={(value) => update('address', value)} placeholder="Full address" multiline /><View style={styles.row}><View style={styles.half}><ProfileField label="Phone" value={form.phone} onChangeText={(value) => update('phone', value)} placeholder="Phone" /></View><View style={styles.half}><ProfileField label="Email" value={form.email} onChangeText={(value) => update('email', value)} placeholder="Email" /></View></View></View>
     <View style={styles.section}><Text style={[styles.sectionTitle, { color: colors.foreground }]}>Footer</Text><ProfileField label="Optional footer text" value={form.footerText} onChangeText={(value) => update('footerText', value)} placeholder="Footer shown on each PDF" multiline /></View>
-    <Pressable onPress={save} style={[styles.saveButton, { backgroundColor: colors.primary }]}><Feather name="check" size={18} color={colors.primaryForeground} /><Text style={[styles.saveText, { color: colors.primaryForeground }]}>Save profile</Text></Pressable>
-    <View style={[styles.privacy, { backgroundColor: colors.secondary }]}><Feather name="shield" size={17} color={colors.primary} /><Text style={[styles.privacyText, { color: colors.secondaryForeground }]}>Private by default. Doctor and patient data stays on this device. No account or cloud sync is required.</Text></View>
+     <View style={styles.section}><Text style={[styles.sectionTitle, { color: colors.foreground }]}>Appearance</Text><View style={styles.themeOptions}>{([['system', 'System default'], ['light', 'Light'], ['dark', 'Dark']] as [ThemePreference, string][]).map(([value, label]) => <Pressable key={value} onPress={() => void setPreference(value)} style={[styles.themeOption, { backgroundColor: colors.card, borderColor: preference === value ? colors.primary : colors.border }, preference === value && { backgroundColor: colors.accent }]}><Text style={[styles.themeOptionText, { color: preference === value ? colors.accentForeground : colors.foreground }]}>{label}</Text></Pressable>)}</View><Text style={[styles.themeHint, { color: colors.mutedForeground }]}>System default follows your device appearance.</Text></View>
+     <Pressable onPress={() => router.push('/about')} style={[styles.aboutButton, { backgroundColor: colors.card, borderColor: colors.border }]}><View style={[styles.aboutIcon, { backgroundColor: colors.secondary }]}><Feather name="info" size={18} color={colors.primary} /></View><View style={{ flex: 1 }}><Text style={[styles.aboutTitle, { color: colors.foreground }]}>About & Support</Text><Text style={[styles.logoHint, { color: colors.mutedForeground }]}>App details, database attribution and support</Text></View><Feather name="chevron-right" size={18} color={colors.mutedForeground} /></Pressable>
+     <Pressable onPress={save} style={[styles.saveButton, { backgroundColor: colors.primary }]}><Feather name="check" size={18} color={colors.primaryForeground} /><Text style={[styles.saveText, { color: colors.primaryForeground }]}>Save profile</Text></Pressable>
+     <View style={[styles.privacy, { backgroundColor: colors.secondary }]}><Feather name="shield" size={17} color={colors.primary} /><Text style={[styles.privacyText, { color: colors.secondaryForeground }]}>Private by default. Doctor and patient data stays on this device. No account or cloud sync is required.</Text></View>
   </ScrollView>;
 }
 
@@ -73,6 +78,13 @@ const styles = StyleSheet.create({
   half: { flex: 1 },
   saveButton: { minHeight: 52, borderRadius: 14, flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
   saveText: { fontSize: 15, fontWeight: '700' },
+  themeOptions: { flexDirection: 'row', gap: 8 },
+  themeOption: { flex: 1, minHeight: 43, borderWidth: 1, borderRadius: 11, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8 },
+  themeOptionText: { fontSize: 12, fontWeight: '700', textAlign: 'center' },
+  themeHint: { fontSize: 11, marginTop: 8 },
+  aboutButton: { borderWidth: 1, borderRadius: 15, padding: 13, flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 10 },
+  aboutIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  aboutTitle: { fontSize: 14, fontWeight: '700' },
   privacy: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', padding: 13, borderRadius: 13, marginTop: 16 },
   privacyText: { flex: 1, fontSize: 12, lineHeight: 17, fontWeight: '500' },
 });

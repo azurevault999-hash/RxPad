@@ -15,6 +15,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { CatalogBackedApp } from '@/components/CatalogBackedApp';
 import { PrescriptionProvider } from '@/state/PrescriptionContext';
+import { ThemeProvider } from '@/state/ThemeContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -25,6 +26,7 @@ function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerBackTitle: 'Back' }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="about" options={{ title: 'About & Support' }} />
     </Stack>
   );
 }
@@ -61,11 +63,13 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ErrorBoundary>
-        <CatalogBackedApp>
-          <AppProviders />
-        </CatalogBackedApp>
-      </ErrorBoundary>
+      <ThemeProvider>
+        <ErrorBoundary>
+          <CatalogBackedApp>
+            <AppProviders />
+          </CatalogBackedApp>
+        </ErrorBoundary>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
