@@ -1,0 +1,513 @@
+Integrate the NRCeS Common Drug Codes for India (CDCI) Flat File Package that has been uploaded to this Replit project.
+
+This is an implementation task. Do not redesign the existing Prescription Pad UI.
+
+==================================================
+OBJECTIVE
+==================================================
+
+Replace the current sample/demo medicine catalogue with the actual NRCeS CDCI medicine data supplied in the project.
+
+The NRCeS database is a LOCAL CATALOGUE / SEARCH ASSISTANT only.
+
+It must never restrict or validate what a doctor can prescribe.
+
+The prescription system and the medicine catalogue must remain architecturally separate.
+
+==================================================
+1. INSPECT THE SUPPLIED PACKAGE
+==================================================
+
+The NRCeS ZIP has already been uploaded to the project.
+
+Use the actual files in that package as the source of truth.
+
+The package contains these master datasets:
+
+- BrandMaster.txt
+- ProductMaster.txt
+- GenericMaster.txt
+- SubstanceMaster.txt
+- SupplierMaster.txt
+- DrugFormMaster.txt
+- RouteOfAdministrationMaster.txt
+
+It also contains documentation/licensing information.
+
+Do not modify the original source files.
+
+Before implementing the database import, inspect the actual headers, delimiters, encoding and relationships.
+
+Do not invent or rename NRCeS identifiers.
+
+==================================================
+2. NRCeS IDENTIFIERS
+==================================================
+
+Preserve the identifiers supplied by NRCeS.
+
+The current package uses:
+
+BrandMaster:
+    Identifier
+
+ProductMaster:
+    Identifier
+
+GenericMaster:
+    Identifier
+
+SubstanceMaster:
+    Identifier
+
+SupplierMaster:
+    Identifier
+
+DrugFormMaster:
+    Id
+
+RouteOfAdministrationMaster:
+    Identifier
+
+These identifiers are important and must not be discarded.
+
+Use them as the catalogue's external/source identifiers.
+
+Do not replace them with arbitrary generated IDs where the NRCeS identifier can be retained.
+
+You may use internal database primary keys where technically appropriate, but the original NRCeS identifier must remain available and uniquely indexed.
+
+==================================================
+3. PRESERVE THE NRCeS RELATIONSHIPS
+==================================================
+
+The important relationships in the supplied data are:
+
+Brand
+    ├── Product Identifier → ProductMaster
+    ├── Supplier Identifier → SupplierMaster
+    └── Generic Identifier → GenericMaster
+
+Generic
+    ├── Substance Identifier → SubstanceMaster
+    ├── Route of Administration → RouteOfAdministrationMaster
+    └── Dose Form → DrugFormMaster
+
+Do not flatten these into a single table unnecessarily.
+
+Preserve the normalized master data and relationships.
+
+Some Generic records can contain multiple substance or route identifiers.
+
+Handle the actual delimiter/representation used by the supplied files rather than assuming a single value.
+
+Do not lose combination-product information.
+
+==================================================
+4. EXPECTED DATA QUALITY
+==================================================
+
+The supplied package contains approximately:
+
+- 93,911 Brand records
+- 72,284 Product records
+- 10,305 Generic records
+- 3,283 Substance records
+- 8,213 Supplier records
+- 423 Drug Form records
+- 160 Route of Administration records
+
+Treat these figures as sanity checks, not hard-coded requirements.
+
+After import, report the actual counts.
+
+Do not manufacture missing records.
+
+If a supplied Brand record references a Generic that does not exist in GenericMaster, preserve the Brand record and handle the unresolved reference safely.
+
+Likewise, do not crash on null or empty optional fields.
+
+==================================================
+5. LOCAL DATABASE
+==================================================
+
+Use the existing database architecture if the project already has one.
+
+If Room/SQLite is already being used, extend it appropriately.
+
+Otherwise use an appropriate local SQLite/Room implementation.
+
+The catalogue should be available locally for fast search and autocomplete.
+
+Do NOT make the Android application call an external medicine API for normal searches.
+
+Do NOT require internet connectivity to prescribe.
+
+The raw NRCeS files should not be parsed every time the app launches.
+
+Prefer importing/building a pre-populated local database as appropriate for this project.
+
+==================================================
+6. CATALOGUE SCHEMA
+==================================================
+
+Create separate catalogue entities/tables corresponding to the NRCeS master data.
+
+At minimum:
+
+- Brand
+- Product
+- Generic
+- Substance
+- Supplier
+- DrugForm
+- RouteOfAdministration
+
+Preserve the original NRCeS identifiers.
+
+Create appropriate indexes for:
+
+- NRCeS identifiers
+- Brand name
+- Product name
+- Generic name
+- Substance name
+- strength/composition fields where applicable
+- relevant foreign keys
+
+Use the actual fields found in the files.
+
+Do not invent clinical meaning for fields merely because their names appear suggestive.
+
+==================================================
+7. PRESCRIPTION DATA MUST REMAIN INDEPENDENT
+==================================================
+
+This is critical.
+
+Do NOT make PrescriptionMedication a child/dependent record of an NRCeS catalogue item.
+
+The doctor's prescription must remain a self-contained record.
+
+Conceptually:
+
+NRCeS Catalogue
+        ↓
+optional search/selection
+        ↓
+prefill
+        ↓
+PrescriptionMedication
+
+NOT:
+
+PrescriptionMedication
+        ↓
+mandatory NRCeS foreign key
+
+A prescription must be valid even when:
+
+- no catalogue result exists
+- the doctor enters a completely custom medicine
+- the catalogue is unavailable
+- the catalogue is later updated
+- the selected catalogue record is later removed
+
+==================================================
+8. FULLY EDITABLE MEDICINE ENTRY
+==================================================
+
+The existing medicine-entry fields must remain fully editable.
+
+At minimum support:
+
+- Medicine name
+- Composition / generic
+- Strength
+- Dosage form
+- Dose
+- Dose unit
+- Frequency
+- Duration
+- Duration unit
+- Route
+- Quantity
+- Instructions
+
+Selecting an NRCeS catalogue result may prefill appropriate fields.
+
+After selection, the doctor can change ANY of those fields.
+
+The catalogue must never overwrite the doctor's edits.
+
+==================================================
+9. MANUAL PRESCRIBING
+==================================================
+
+Manual entry is always allowed.
+
+The doctor must be able to enter a medicine that has no NRCeS match.
+
+There must be no:
+
+- "Medicine not found" blocking message
+- mandatory catalogue selection
+- mandatory NRCeS ID
+- catalogue validation
+- dosage validation against the catalogue
+- frequency validation against the catalogue
+- route validation against the catalogue
+
+The catalogue is an autocomplete convenience, nothing more.
+
+==================================================
+10. OPTIONAL CATALOGUE REFERENCE
+==================================================
+
+If useful, PrescriptionMedication may retain optional source references such as:
+
+catalogBrandIdentifier
+catalogProductIdentifier
+catalogGenericIdentifier
+
+These must be nullable/optional.
+
+They are provenance/reference information only.
+
+They must NOT be required to load, display, edit, save or print a prescription.
+
+The actual prescription values must be stored independently.
+
+==================================================
+11. SEARCH / AUTOCOMPLETE
+==================================================
+
+Implement fast local medicine search.
+
+The search should be able to search the clinically useful fields actually present in the NRCeS data, including where appropriate:
+
+- Brand
+- Product Name
+- Generic
+- Substance
+- composition
+- strength
+- dosage form
+
+Search should not require an exact match.
+
+Support normal case-insensitive searching.
+
+Use indexed/database queries rather than loading the entire catalogue into application memory.
+
+Limit autocomplete results to a sensible number.
+
+Debounce typing if appropriate.
+
+The UI should remain responsive on an ordinary Android phone.
+
+==================================================
+12. SEARCH RESULT PRESENTATION
+==================================================
+
+Keep the existing Prescription Pad visual design.
+
+Search results should show enough information to distinguish products, for example:
+
+Brand / Product
+Generic / composition
+Strength
+Dosage form
+
+Use the actual available NRCeS fields.
+
+Do NOT display technical NRCeS identifiers to the doctor unless there is a specific reason.
+
+The doctor should experience this as a medicine search tool, not a database browser.
+
+==================================================
+13. IMPORTANT EXAMPLE
+==================================================
+
+The supplied BrandMaster contains entries such as:
+
+"Safedox (cefpodoxime) 200 mg film-coated oral tablet"
+
+Do not assume that Brand Name is merely a short brand string.
+
+Use the actual NRCeS structure and related Product/Generic/Substance/Form information when constructing search results and prefilling fields.
+
+Do not destroy useful formulation information by unnecessarily splitting or normalizing human-readable fields.
+
+==================================================
+14. UI
+==================================================
+
+Preserve the current Prescription Pad UI and design language.
+
+Do not redesign:
+
+- PRESCRIPTION PAD header
+- Write a prescription screen
+- Patient details
+- Clinical details
+- Medicines section
+- Medicine cards
+- Preview prescription button
+- Bottom navigation
+- Write
+- History
+- Profile
+
+Remove outdated sample-catalogue wording such as:
+
+"Sample catalog · CDCI import-ready"
+
+Replace it with neutral wording such as:
+
+"Medicine catalogue"
+
+or simply remove the label.
+
+Do not expose implementation details.
+
+==================================================
+15. PDF
+==================================================
+
+Do not change the existing prescription PDF architecture unnecessarily.
+
+The PDF must contain the doctor's actual prescription values.
+
+It must not query NRCeS when generating the PDF.
+
+The PDF must remain:
+
+- actual A4
+- print-ready
+- shareable
+- printable
+- suitable for physical signature
+
+A catalogue update must never alter an already saved prescription or its generated content.
+
+==================================================
+16. IMPORT PROCESS
+==================================================
+
+Implement a reliable import process for the supplied NRCeS package.
+
+Requirements:
+
+- parse the actual files
+- preserve encoding
+- preserve identifiers
+- correctly resolve relationships
+- handle nulls
+- handle empty fields
+- handle multiple identifiers where present
+- use transactions/batched inserts
+- avoid UI-thread blocking
+- report import errors rather than silently corrupting data
+
+The raw source package should remain untouched.
+
+If practical, perform the transformation during the build/development process and ship a pre-populated local database with the app.
+
+Do not make the first-run user wait for a massive raw-file import unless there is a compelling technical reason.
+
+==================================================
+17. FUTURE UPDATES
+==================================================
+
+Design the catalogue so a future NRCeS release can replace/update the catalogue without affecting existing prescriptions.
+
+Catalogue version/import metadata may be stored.
+
+Do not hard-code the current release into the prescription schema.
+
+Existing prescriptions must remain valid even after a catalogue update.
+
+The architecture should also leave room for a future API/database endpoint, but DO NOT implement a remote API now.
+
+Current priority:
+
+LOCAL CATALOGUE
++
+OFFLINE PRESCRIPTION
+
+==================================================
+18. PRIVACY
+==================================================
+
+Prescription Pad is local-first.
+
+Do not send patient or prescription information anywhere.
+
+Do not add analytics or telemetry.
+
+Do not introduce a remote backend dependency.
+
+Medicine catalogue data may eventually be served remotely in a future version, but that is NOT part of this task.
+
+==================================================
+19. TESTING
+==================================================
+
+After implementation, test all of the following:
+
+1. Search by brand.
+2. Search by product.
+3. Search by generic.
+4. Search by substance/composition where applicable.
+5. Search by strength.
+6. Search by formulation/dosage form.
+7. Select a catalogue result.
+8. Verify appropriate fields are populated.
+9. Edit every populated field.
+10. Save the prescription.
+11. Reload the prescription.
+12. Verify the doctor's edits remain unchanged.
+13. Enter a completely custom medicine.
+14. Save a prescription containing both catalogue-selected and manually entered medicines.
+15. Generate the A4 PDF.
+16. Verify the PDF contains the final edited values, not the original catalogue values.
+17. Close and reopen the app.
+18. Verify prescription data remains intact.
+19. Verify catalogue search works offline.
+20. Verify an unresolved NRCeS reference does not crash the application.
+
+==================================================
+20. BUILD / DELIVERABLE
+==================================================
+
+After implementation:
+
+- Build the Android application.
+- Fix compilation errors.
+- Fix database/import errors.
+- Fix runtime errors discovered during testing.
+- Verify the release build still works.
+
+Do not merely describe what should be done.
+
+Actually implement the NRCeS catalogue integration.
+
+At the end, provide a concise implementation report containing:
+
+1. Actual record counts imported.
+2. Tables/entities created.
+3. NRCeS identifiers used.
+4. Relationships implemented.
+5. Search fields/indexes.
+6. How prescription/catalogue separation was implemented.
+7. Any unresolved references or data-quality issues.
+8. Where the generated local database is stored.
+9. Whether the Android build succeeds.
+10. Any remaining issues.
+
+Do not change the existing product direction.
+
+The finished app should still feel like a simple digital prescription pad.
+
+The NRCeS database should simply make medicine entry faster and more convenient.

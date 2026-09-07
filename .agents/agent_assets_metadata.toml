@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "nw0Hb4vehZM8FrnJoaQNF"
+uri = "file://release/PrescriptionPad-1.0.0.apk"
+type = "unspecified"
+title = "Prescription Pad Android APK"
+description = "Release APK with the bundled NRCeS CDCI offline catalogue, local autocomplete, and the existing prescription workflow. Package com.prescriptionpad.app, version 1.0.0."
+logical_id = "fff0bd9f-ea51-436d-8cb2-5df04f612945"
+content_hash = "sha256:b9cee1dd9d2ef347efaa7cb7f6829551ee0832c9638d541cb130e80705715740"
+size = 94840731
+mtime_ms = 1788700128219
+storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:1b8e1443-bcdd-4194-8837-9e6760476a95/fff0bd9f-ea51-436d-8cb2-5df04f612945/248f45dc-eb07-4dde-883d-f89d8b955cf9"
+storage_version_token = "1788700313169729"
+content_type = "application/octet-stream"

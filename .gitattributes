@@ -1,0 +1,3 @@
+release/PrescriptionPad-1.0.0.apk filter=lfs diff=lfs merge=lfs -text
+artifacts/prescription-pad/assets/data/cdci.sqlite filter=lfs diff=lfs merge=lfs -text
+*.apk filter=lfs diff=lfs merge=lfs -text

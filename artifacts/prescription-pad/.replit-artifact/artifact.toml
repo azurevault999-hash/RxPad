@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/prescription-pad/"
+title = "Prescription Pad"
+description = "A local-first Android prescription-writing app for doctors to configure their profile, write prescriptions quickly, preview them on A4, and generate print-ready PDFs for signing and sharing."
+version = "1.0.0"
+id = "artifacts/prescription-pad"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/prescription-pad/" ]
+localPort = 22339
+
+[services.development]
+run = "pnpm --filter @workspace/prescription-pad run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/prescription-pad", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/prescription-pad", "run", "serve" ]
+
+[services.env]
+PORT = "22339"
+BASE_PATH = "/prescription-pad/"
