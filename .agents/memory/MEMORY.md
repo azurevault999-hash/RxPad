@@ -1,2 +1,3 @@
 - [Expo mobile persistence and PDF setup](expo-prescription-pad.md) — local-first AsyncStorage/provider boundary; SDK 57 PDF file saves use the legacy file-system import.
 - [CDCI catalog packaging](cdci-catalog.md) — bundled SQLite uses native-only provider/asset modules so web preview remains manual-only and Android stays fully offline.
+- [Android release build environment](android-release-build.md) — local Gradle needs a writable Android SDK view with SDK 36 and Build Tools 35/36; Nix's SDK payload is under libexec/android-sdk.
